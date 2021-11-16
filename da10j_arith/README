@@ -1,0 +1,69 @@
+Arithmetic coder equivalent to the rapid image delta Test2 entry.
+This isn't particularly much better, but I figured I may as well get
+the maximum compression and use it for balanced too, on the slim
+chance it clings on to 3rd spot.
+
+This uses htscodecs with some basic pre-filtering. Htscodecs code is
+copied in here (far more than it needs infact), but originates from:
+
+    https://github.com/jkbonfield/htscodecs/tree/unroll32
+
+The delta_arith10.c code is the main driver.  It parses the filenames to
+extract X and Y sizes and bit-depths and then does deltas, even raster
+line at a time or full image at a time (it tries multiple methods with
+some entropy estimator to see what works best).
+
+Usage:
+
+./da9j e T2_demo/multispec2_512x512x31x16u img.comp
+./da9j d img.comp img.uncomp
+cmp T2_demo/multispec2_512x512x31x16u img.uncomp
+
+The build.sh script compiles it and test.sh uses data in a sibling directory
+to cycle through the demo test set.
+
+
+Results
+-------
+
+jkb@Orion:~/gdcc/T2/da9j_arith$ ./test.sh
+../T2_demo/astro0_2048x1489x5x32f        14993748
+../T2_demo/astro1_2048x1489x5x32f        14536406
+../T2_demo/astro2_2048x1489x5x32f        15237694
+../T2_demo/micro0_2500x3000x5x16u        57673038
+../T2_demo/micro1_946x700x10x16u         7950119
+../T2_demo/micro2_946x700x10x16u         8222756
+../T2_demo/micro3_946x700x10x16u         8084622
+../T2_demo/micro4_946x700x8x16u          6732503
+../T2_demo/micro5_946x700x6x16u          5083193
+../T2_demo/multispec0_512x512x31x16u     9654558
+../T2_demo/multispec1_512x512x31x16u     10089857
+../T2_demo/multispec2_512x512x31x16u     8777316
+../T2_demo/multispec3_512x512x31x16u     10238455
+../T2_demo/multispec4_512x512x31x16u     8528717
+../T2_demo/multispec5_512x512x31x16u     9799207
+../T2_demo/multispec6_512x512x31x16u     9985470
+../T2_demo/multispec7_512x512x31x16u     9938846
+../T2_demo/multispec8_512x512x31x16u     9250042
+../T2_demo/multispec9_512x512x31x16u     9301558
+../T2_demo/tele0_432x256x8x16s           994190
+../T2_demo/tele10_432x128x8x32f          265718
+../T2_demo/tele11_432x128x8x32f          324256
+../T2_demo/tele1_432x256x8x16s           970370
+../T2_demo/tele2_432x256x8x16s           1061308
+../T2_demo/tele3_432x256x8x16s           620861
+../T2_demo/tele4_432x256x8x16s           763891
+../T2_demo/tele5_432x256x8x16s           948003
+../T2_demo/tele6_432x128x8x32f           381697
+../T2_demo/tele7_432x128x8x32f           324512
+../T2_demo/tele8_432x128x8x32f           278080
+../T2_demo/tele9_432x128x8x32f           354168
+
+real	1m0.171s
+user	0m57.953s
+sys	0m2.234s
+241365159
+
+real	0m11.655s
+user	0m9.281s
+sys	0m1.578s

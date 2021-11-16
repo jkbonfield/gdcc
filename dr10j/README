@@ -1,0 +1,49 @@
+This combines one of the rANS implementations in htscodecs with some
+basic pre-filtering.  Htscodecs code is copied in here (far more than
+it needs infact), but originates from:
+
+    https://github.com/jkbonfield/htscodecs/tree/unroll32
+
+Just building that and using ./test/rans4x16pr -o 0x209 < in > out
+(or -o 0x409 on the 32f files) works pretty well.  That's order-1
+entropy encoding with striped data access on 2-byte or 4-byte
+boundaries.  Eg equivalent to extracting byte 0,2,4,6,... and O1
+encode that, and byte 1,3,5,7,... and encode that.  For 16-bit and
+32-bit quantities that's a fast enough approximation.
+
+The delta_rans10.c code is the main driver.  It parses the filenames to
+extract X and Y sizes and bit-depths and then does deltas, even raster
+line at a time or full image at a time (it tries multiple methods with
+some entropy estimator to see what works best).
+
+There's nothing hugely clever and it makes no attempt to do image
+alignment / registration to adjust to small image shifts.  However
+what it aimed for absolute maximum performance.
+
+
+Building
+--------
+
+There is a build.sh script which just compiles everything together.
+It produces both dr4j (the complete encoder and decoder) as well as a
+stripped down dr4j_dec which contains the decode-side only for
+purposes of minimising archive size in the competition.
+
+The build script enables AVX2 support.  The full htscodecs
+implementation contains pure scalar versions as well as SSE4.1, AVX512
+and ARM Neon implementations.
+
+Note I've tested it with both modern gcc and clang versions and for this
+test at least clang was winning out on speed.  I don't have MSVC to test.
+
+There are also Ubuntu 18.04 binaries included in the tar ball.
+
+Running
+-------
+
+./dr4j e T2_demo/multispec2_512x512x31x16u img.comp
+./dr4j_dec d img.comp img.uncomp
+cmp T2_demo/multispec2_512x512x31x16u img.uncomp
+
+The test.sh script attempts to encode, decode and compare everything
+in the ../T2_demo directory.
